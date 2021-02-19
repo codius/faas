@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/subtle"
 	"fmt"
 	"log"
 	"net/http"
@@ -42,7 +43,7 @@ func main() {
 		panic(errors.Wrap(err, "unable to read basic auth credentials, check `secret_mount_path`"))
 	}
 
-	authHandler := auth.DecorateWithBasicAuth(func(w http.ResponseWriter, r *http.Request) {
+	authHandler := DecorateWithBasicAuth(func(w http.ResponseWriter, r *http.Request) {
 	}, credentials)
 	http.HandleFunc("/validate", makeLogger(authHandler))
 
@@ -52,6 +53,43 @@ func main() {
 
 	log.Printf("Listening on: %d\n", port)
 	log.Fatal(s.ListenAndServe())
+}
+
+// DecorateWithBasicAuth enforces basic auth as a middleware with given credentials
+func DecorateWithBasicAuth(next http.HandlerFunc, credentials *auth.BasicAuthCredentials) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		user, password, ok := r.BasicAuth()
+
+		const noMatch = 0
+		if !ok ||
+			user != credentials.User ||
+			subtle.ConstantTimeCompare([]byte(credentials.Password), []byte(password)) == noMatch {
+
+			namespace := r.Header.Get("X-Namespace")
+
+			credentialsReader := auth.ReadBasicAuthFromDisk{
+				SecretMountPath:  os.Getenv("secret_mount_path"),
+				UserFilename:     namespace + "-user",
+				PasswordFilename: namespace + "-password",
+			}
+
+			nsCreds, err := credentialsReader.Read()
+			if err != nil ||
+				len(namespace) == 0 ||
+				namespace == "kube-system" ||
+				user != nsCreds.User ||
+				subtle.ConstantTimeCompare([]byte(nsCreds.Password), []byte(password)) == noMatch {
+
+				w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte("invalid credentials"))
+				return
+			}
+		}
+
+		next.ServeHTTP(w, r)
+	}
 }
 
 func makeLogger(next http.Handler) func(w http.ResponseWriter, r *http.Request) {

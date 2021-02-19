@@ -15,6 +15,10 @@ func MakeExternalAuthHandler(next http.HandlerFunc, upstreamTimeout time.Duratio
 
 		copyHeaders(req.Header, &r.Header)
 
+		q := r.URL.Query()
+		namespace := q.Get("namespace")
+		req.Header.Add("X-Namespace", namespace)
+
 		deadlineContext, cancel := context.WithTimeout(
 			context.Background(),
 			upstreamTimeout)
