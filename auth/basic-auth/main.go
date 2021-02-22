@@ -70,14 +70,12 @@ func DecorateWithBasicAuth(next http.HandlerFunc, credentials *auth.BasicAuthCre
 
 			credentialsReader := auth.ReadBasicAuthFromDisk{
 				SecretMountPath:  os.Getenv("secret_mount_path"),
-				PasswordFilename: namespace + "-password",
+				PasswordFilename: user + "-password",
 			}
 
 			nsCreds, err := credentialsReader.Read()
 			if err != nil ||
-				len(namespace) == 0 ||
-				namespace == "kube-system" ||
-				user != namespace ||
+				namespaceIsValid(namespace, user) == false ||
 				subtle.ConstantTimeCompare([]byte(nsCreds.Password), []byte(password)) == noMatch {
 
 				w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
@@ -89,6 +87,24 @@ func DecorateWithBasicAuth(next http.HandlerFunc, credentials *auth.BasicAuthCre
 
 		next.ServeHTTP(w, r)
 	}
+}
+
+func namespaceIsValid(namespace string, user string) bool {
+	if len(namespace) == 0 {
+		return true
+	} else if namespace != user {
+		return false
+	}
+
+	for _, restricted := range []string{
+		"admin",
+		"kube-system",
+	} {
+		if namespace == restricted {
+			return false
+		}
+	}
+	return true
 }
 
 func makeLogger(next http.Handler) func(w http.ResponseWriter, r *http.Request) {

@@ -187,29 +187,29 @@ func main() {
 
 	if credentials != nil {
 		faasHandlers.Alert =
-			decorateExternalAuth(faasHandlers.Alert, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody)
+			decorateExternalAuth(faasHandlers.Alert, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody, handlers.NoNamespace)
 		faasHandlers.UpdateFunction =
-			decorateExternalAuth(faasHandlers.UpdateFunction, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody)
+			decorateExternalAuth(faasHandlers.UpdateFunction, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody, handlers.NamespaceInBody)
 		faasHandlers.DeleteFunction =
-			decorateExternalAuth(faasHandlers.DeleteFunction, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody)
+			decorateExternalAuth(faasHandlers.DeleteFunction, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody, handlers.NamespaceInQueryParam)
 		faasHandlers.DeployFunction =
-			decorateExternalAuth(faasHandlers.DeployFunction, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody)
+			decorateExternalAuth(faasHandlers.DeployFunction, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody, handlers.NamespaceInBody)
 		faasHandlers.ListFunctions =
-			decorateExternalAuth(faasHandlers.ListFunctions, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody)
+			decorateExternalAuth(faasHandlers.ListFunctions, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody, handlers.NamespaceInQueryParam)
 		faasHandlers.ScaleFunction =
-			decorateExternalAuth(faasHandlers.ScaleFunction, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody)
+			decorateExternalAuth(faasHandlers.ScaleFunction, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody, handlers.NoNamespace)
 		faasHandlers.QueryFunction =
-			decorateExternalAuth(faasHandlers.QueryFunction, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody)
+			decorateExternalAuth(faasHandlers.QueryFunction, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody, handlers.NoNamespace)
 		faasHandlers.InfoHandler =
-			decorateExternalAuth(faasHandlers.InfoHandler, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody)
+			decorateExternalAuth(faasHandlers.InfoHandler, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody, handlers.NoNamespace)
 		faasHandlers.AsyncReport =
-			decorateExternalAuth(faasHandlers.AsyncReport, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody)
+			decorateExternalAuth(faasHandlers.AsyncReport, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody, handlers.NoNamespace)
 		faasHandlers.SecretHandler =
-			decorateExternalAuth(faasHandlers.SecretHandler, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody)
+			decorateExternalAuth(faasHandlers.SecretHandler, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody, handlers.NoNamespace)
 		faasHandlers.LogProxyHandler =
-			decorateExternalAuth(faasHandlers.LogProxyHandler, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody)
+			decorateExternalAuth(faasHandlers.LogProxyHandler, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody, handlers.NoNamespace)
 		faasHandlers.NamespaceListerHandler =
-			decorateExternalAuth(faasHandlers.NamespaceListerHandler, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody)
+			decorateExternalAuth(faasHandlers.NamespaceListerHandler, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody, handlers.NoNamespace)
 	}
 
 	r := mux.NewRouter()
@@ -251,7 +251,7 @@ func main() {
 	uiHandler := http.StripPrefix("/ui", fsCORS)
 	if credentials != nil {
 		r.PathPrefix("/ui/").Handler(
-			decorateExternalAuth(uiHandler.ServeHTTP, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody)).Methods(http.MethodGet)
+			decorateExternalAuth(uiHandler.ServeHTTP, config.UpstreamTimeout, config.AuthProxyURL, config.AuthProxyPassBody, handlers.NoNamespace)).Methods(http.MethodGet)
 	} else {
 		r.PathPrefix("/ui/").Handler(uiHandler).Methods(http.MethodGet)
 	}

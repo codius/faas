@@ -21,7 +21,7 @@ func Test_External_Auth_Wrapper_FailsInvalidAuth(t *testing.T) {
 	}
 
 	passBody := false
-	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody)
+	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody, NoNamespace)
 
 	req := httptest.NewRequest(http.MethodGet, s.URL, nil)
 	rr := httptest.NewRecorder()
@@ -47,7 +47,7 @@ func Test_External_Auth_Wrapper_FailsInvalidAuth_WritesBody(t *testing.T) {
 	}
 
 	passBody := false
-	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody)
+	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody, NoNamespace)
 
 	req := httptest.NewRequest(http.MethodGet, s.URL, nil)
 	rr := httptest.NewRecorder()
@@ -74,7 +74,7 @@ func Test_External_Auth_Wrapper_PassesValidAuth(t *testing.T) {
 	}
 
 	passBody := false
-	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody)
+	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody, NoNamespace)
 
 	req := httptest.NewRequest(http.MethodGet, s.URL, nil)
 	rr := httptest.NewRecorder()
@@ -101,7 +101,7 @@ func Test_External_Auth_Wrapper_WithoutRequiredHeaderFailsAuth(t *testing.T) {
 	}
 
 	passBody := false
-	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody)
+	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody, NoNamespace)
 
 	req := httptest.NewRequest(http.MethodGet, s.URL, nil)
 
@@ -135,7 +135,7 @@ func Test_External_Auth_Wrapper_WithoutRequiredHeaderFailsAuth_ProxiesServerHead
 	}
 
 	passBody := false
-	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody)
+	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody, NoNamespace)
 
 	req := httptest.NewRequest(http.MethodGet, s.URL, nil)
 
@@ -171,7 +171,7 @@ func Test_External_Auth_Wrapper_WithRequiredHeaderPassesValidAuth(t *testing.T) 
 	}
 
 	passBody := false
-	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody)
+	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody, NoNamespace)
 
 	req := httptest.NewRequest(http.MethodGet, s.URL, nil)
 	req.Header.Set("X-Token", wantToken)
@@ -197,7 +197,7 @@ func Test_External_Auth_Wrapper_TimeoutGivesInternalServerError(t *testing.T) {
 	}
 
 	passBody := false
-	handler := MakeExternalAuthHandler(next, time.Millisecond*10, s.URL, passBody)
+	handler := MakeExternalAuthHandler(next, time.Millisecond*10, s.URL, passBody, NoNamespace)
 
 	req := httptest.NewRequest(http.MethodGet, s.URL, nil)
 	rr := httptest.NewRecorder()
@@ -227,7 +227,7 @@ func Test_External_Auth_Wrapper_TimeoutGivesInternalServerError(t *testing.T) {
 // 	}
 
 // 	passBody := false
-// 	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody)
+// 	handler := MakeExternalAuthHandler(next, time.Second*5, s.URL, passBody, NoNamespace)
 
 // 	req := httptest.NewRequest(http.MethodGet, s.URL, nil)
 // 	rr := httptest.NewRecorder()
