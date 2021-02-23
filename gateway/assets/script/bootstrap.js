@@ -4,6 +4,22 @@
 
 var app = angular.module('faasGateway', ['ngMaterial', 'ngMessages', 'faasGateway.funcStore']);
 
+app.config(['$httpProvider', function($httpProvider) {
+    $httpProvider.interceptors.push(function($q) {
+      return {
+       'request': function(config) {
+          console.log(config);
+          return config;
+        },
+
+        'response': function(response) {
+           console.log(response)
+           return response;
+        }
+      };
+    });
+}]);
+
 app.controller("home", ['$scope', '$log', '$http', '$location', '$interval', '$filter', '$mdDialog', '$mdToast', '$mdSidenav',
     function($scope, $log, $http, $location, $interval, $filter, $mdDialog, $mdToast, $mdSidenav) {
         var FUNCSTORE_DEPLOY_TAB_INDEX = 0;
@@ -65,9 +81,6 @@ app.controller("home", ['$scope', '$log', '$http', '$location', '$interval', '$f
 
         var fetchFunctionsDelay = 3500;
         var queryFunctionDelay = 2500;
-
-
-
 
         $http.get("../system/namespaces")
             .then(function(response) {
